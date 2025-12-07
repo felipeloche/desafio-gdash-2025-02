@@ -64,6 +64,7 @@ services:
       - DEFAULT_USER_EMAIL=${DEFAULT_USER_EMAIL}
       - DEFAULT_USER_PASSWORD=${DEFAULT_USER_PASSWORD}
       - DEFAULT_USER_NAME=${DEFAULT_USER_NAME}
+      - GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY}
     depends_on:
       mongodb:
         condition: service_healthy
@@ -127,7 +128,11 @@ services:
   # ==========================================
   # FRONTEND - React + Vite
   # ==========================================
+  # NOTA: Frontend está desabilitado por padrão para desenvolvimento
+  # Para habilitar: docker-compose --profile with-frontend up -d
   frontend:
+    profiles:
+      - with-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile

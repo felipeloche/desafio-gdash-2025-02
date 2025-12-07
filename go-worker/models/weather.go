@@ -21,6 +21,18 @@ type WeatherData struct {
 	FeelsLike       *float64    `json:"feelsLike,omitempty"`
 	Pressure        *float64    `json:"pressure,omitempty"`
 	RawData         interface{} `json:"rawData,omitempty"`
+
+	// Novos campos para controle de dados
+	IsForecast      bool        `json:"isForecast"`
+	Granularity     string      `json:"granularity"`
+	ExpiresAt       *time.Time  `json:"expiresAt,omitempty"`
+
+	// Campos para dados diários
+	TemperatureMin  *float64    `json:"temperature_min,omitempty"`
+	TemperatureMax  *float64    `json:"temperature_max,omitempty"`
+	HumidityAvg     *float64    `json:"humidity_avg,omitempty"`
+	WindSpeedAvg    *float64    `json:"windSpeed_avg,omitempty"`
+	RainProbAvg     *float64    `json:"rainProbability_avg,omitempty"`
 }
 
 // APIResponse representa a resposta da API NestJS

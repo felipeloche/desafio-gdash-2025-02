@@ -1,5 +1,3 @@
-planejamento.md
-planejamento-final.md
 README (1).md
 .claude/
 
@@ -13,6 +11,9 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+
+# Tokens e dados sensíveis
+token.json
 
 # Build outputs
 dist/

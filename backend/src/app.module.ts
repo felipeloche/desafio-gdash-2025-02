@@ -9,6 +9,7 @@ import { WeatherModule } from './weather/weather.module';
 import { InsightsModule } from './insights/insights.module';
 import { ExternalApiModule } from './external-api/external-api.module';
 import { UsersService } from './users/users.service';
+import { WeatherService } from './weather/weather.service';
 
 @Module({
   imports: [
@@ -26,10 +27,27 @@ import { UsersService } from './users/users.service';
   providers: [AppService],
 })
 export class AppModule implements OnModuleInit {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private weatherService: WeatherService,
+  ) {}
 
   async onModuleInit() {
     // Criar usuário padrão ao iniciar
     await this.usersService.createDefaultUser();
+
+    // Verificar e popular dados iniciais se MongoDB estiver vazio
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const now = new Date();
+
+    const hasData = await this.weatherService.hasDataInRange(sevenDaysAgo, now);
+
+    if (!hasData) {
+      console.log('📊 MongoDB vazio, populando dados iniciais...');
+      await this.weatherService.seedInitialData();
+    } else {
+      console.log('✅ MongoDB já possui dados dos últimos 7 dias');
+    }
   }
 }

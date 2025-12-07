@@ -63,4 +63,44 @@ export class CreateWeatherLogDto {
   @IsOptional()
   @IsObject()
   rawData?: any;
+
+  // Novos campos para controle de dados
+  @ApiProperty({ required: false, default: false })
+  @IsOptional()
+  isForecast?: boolean;
+
+  @ApiProperty({ required: false, default: 'hourly' })
+  @IsOptional()
+  @IsString()
+  granularity?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  expiresAt?: any;
+
+  // Campos para dados diários
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  temperature_min?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  temperature_max?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  humidity_avg?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  windSpeed_avg?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  rainProbability_avg?: number;
 }

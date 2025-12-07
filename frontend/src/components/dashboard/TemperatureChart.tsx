@@ -62,7 +62,7 @@ export function TemperatureChart({ data }: TemperatureChartProps) {
     if (value === minTemp || value === maxTemp) {
       return (
         <g>
-          <circle cx={cx} cy={cy} r={5} fill={value === maxTemp ? "#ef4444" : "#3b82f6"} stroke="white" strokeWidth={2} />
+          <circle cx={cx} cy={cy} r={5} fill="#14b8a6" stroke="white" strokeWidth={2} />
           <text x={cx} y={cy - 10} textAnchor="middle" fill="#666" fontSize={12} fontWeight="bold">
             {value}°
           </text>
@@ -77,7 +77,7 @@ export function TemperatureChart({ data }: TemperatureChartProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Thermometer className="h-5 w-5" />
-          Temperatura (Hoje)
+          Previsão de Temperatura (Hoje)
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -103,7 +103,7 @@ export function TemperatureChart({ data }: TemperatureChartProps) {
               <Line 
                 type="monotone" 
                 dataKey="temperature" 
-                stroke="#ef4444" 
+                stroke="#14b8a6" 
                 strokeWidth={2} 
                 dot={<CustomDot />}
                 activeDot={{ r: 6, strokeWidth: 0 }}

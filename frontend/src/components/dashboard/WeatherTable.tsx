@@ -25,11 +25,21 @@ export function WeatherTable({ data }: WeatherTableProps) {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [exportLoading, setExportLoading] = useState(false);
-  const itemsPerPage = 5;
+  const itemsPerPage = 12;
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  // Filtrar apenas dados passados/presentes (sem previsões futuras)
+  const now = new Date();
+  const pastData = data.filter(log => {
+    const logDate = new Date(log.timestamp);
+    return logDate <= now;
+  });
+
+  // Inverter ordem para mostrar mais recentes primeiro e limitar a 168 registros (7 dias)
+  const reversedData = [...pastData].reverse().slice(0, 168);
+
+  const totalPages = Math.ceil(reversedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedData = reversedData.slice(startIndex, startIndex + itemsPerPage);
 
   const formatCondition = (condition: string): string => {
     const conditions: Record<string, string> = {
@@ -144,7 +154,7 @@ export function WeatherTable({ data }: WeatherTableProps) {
             Anterior
           </Button>
 
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+          {Array.from({ length: totalPages }, (_, i) => {
             const page = i + 1;
             return (
               <Button

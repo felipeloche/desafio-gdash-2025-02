@@ -80,7 +80,7 @@ export function RainChart({ data }: RainChartProps) {
               <Line 
                 type="monotone" 
                 dataKey="probability" 
-                stroke="#3b82f6" 
+                stroke="#14b8a6" 
                 strokeWidth={2} 
                 dot={false}
                 connectNulls

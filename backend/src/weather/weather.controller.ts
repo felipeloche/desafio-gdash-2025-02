@@ -26,43 +26,7 @@ export class WeatherController {
     return this.weatherService.create(createWeatherLogDto);
   }
 
-  @Get('logs')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Listar registros de clima com paginação' })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, example: 50 })
-  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const pageNum = parseInt(page || '1') || 1;
-    const limitNum = parseInt(limit || '50') || 50;
-    return this.weatherService.findAll(pageNum, limitNum);
-  }
 
-  @Get('logs/latest')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Obter registros mais recentes' })
-  @ApiQuery({ name: 'limit', required: false, example: 10 })
-  getLatest(@Query('limit') limit?: string) {
-    const limitNum = parseInt(limit || '10') || 10;
-    return this.weatherService.getLatest(limitNum);
-  }
-
-  @Get('logs/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Buscar registro por ID' })
-  findOne(@Param('id') id: string) {
-    return this.weatherService.findOne(id);
-  }
-
-  @Get('stats')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Obter estatísticas dos dados' })
-  getStats() {
-    return this.weatherService.getStats();
-  }
 
   @Get('export/csv')
   @UseGuards(JwtAuthGuard)
@@ -91,7 +55,7 @@ export class WeatherController {
   async exportXlsx(@Res() res: Response) {
     try {
       const filePath = await this.weatherService.exportToXlsx();
-      
+
       res.download(filePath, 'weather-data.xlsx', (err) => {
         if (err) {
           console.error('Erro ao enviar arquivo:', err);
@@ -102,5 +66,46 @@ export class WeatherController {
     } catch (error) {
       res.status(500).json({ message: 'Erro ao gerar XLSX', error: error.message });
     }
+  }
+
+
+
+  @Get('forecast-range')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obter dados de -7 a +7 dias (dados horários)',
+    description: 'Retorna dados horários dos últimos 7 dias até os próximos 7 dias. Para gráficos padrão do dashboard.'
+  })
+  getForecastRange() {
+    return this.weatherService.getForecastRange();
+  }
+
+  @Get('custom-chart')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Gráfico personaliz\u00e1vel com agregação de dados',
+    description: 'Retorna dados agregados conforme métrica e período selecionados. Suporta agregação horária, diária, semanal e mensal.'
+  })
+  @ApiQuery({
+    name: 'metric',
+    required: false,
+    enum: ['temperature', 'humidity', 'windSpeed', 'rainProbability'],
+    description: 'Métrica a ser analisada',
+    example: 'temperature'
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    enum: ['today', 'last_week', 'last_2_weeks', 'last_month', 'last_3_months', 'last_6_months', 'last_12_months'],
+    description: 'Período de análise',
+    example: 'last_week'
+  })
+  getCustomChart(
+    @Query('metric') metric?: string,
+    @Query('period') period?: string,
+  ) {
+    return this.weatherService.getCustomChart({ metric, period });
   }
 }

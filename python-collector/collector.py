@@ -2,11 +2,12 @@ import os
 import json
 import time
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional
 import requests
 import pika
 from dotenv import load_dotenv
+from populate_historical import HistoricalDataPopulator
 
 # Configurar logging
 logging.basicConfig(
@@ -37,19 +38,11 @@ class WeatherCollector:
     def collect_weather_data(self) -> Optional[Dict]:
         """Coletar dados da API Open-Meteo"""
         try:
+            # Usar EXATAMENTE os mesmos parâmetros do frontend para consistência
             params = {
                 'latitude': self.location_lat,
                 'longitude': self.location_lon,
-                'current': [
-                    'temperature_2m',
-                    'relative_humidity_2m',
-                    'apparent_temperature',
-                    'precipitation',
-                    'rain',
-                    'weather_code',
-                    'pressure_msl',
-                    'wind_speed_10m',
-                ],
+                'current': 'temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code',
                 'timezone': self.location_timezone,
             }
             
@@ -63,9 +56,16 @@ class WeatherCollector:
             weather_code = data['current'].get('weather_code', 0)
             condition = self._map_weather_code(weather_code)
             
+            # Normalizar timestamp para hora cheia (00:00:00)
+            now = datetime.utcnow()
+            rounded_time = now.replace(minute=0, second=0, microsecond=0)
+            
+            # Calcular expiresAt: 7 dias a partir da hora normalizada
+            expires_at = rounded_time + timedelta(days=7)
+
             # Estruturar dados
             weather_data = {
-                'timestamp': datetime.utcnow().isoformat() + 'Z',
+                'timestamp': rounded_time.isoformat() + 'Z',
                 'location': {
                     'name': self.location_name,
                     'latitude': self.location_lat,
@@ -82,6 +82,10 @@ class WeatherCollector:
                 'feelsLike': data['current'].get('apparent_temperature', 0),
                 'pressure': data['current'].get('pressure_msl', 0),
                 'rawData': data,
+                # Novos campos
+                'isForecast': False,  # Dados coletados são sempre reais (não previsão)
+                'granularity': 'hourly',
+                'expiresAt': expires_at.isoformat() + 'Z',
             }
             
             logger.info(f"✅ Dados coletados: {weather_data['temperature']}°C, {weather_data['humidity']}%, {condition}")
@@ -188,11 +192,27 @@ class WeatherCollector:
         logger.info(f"📍 Local: {self.location_name}")
         logger.info(f"⏱️  Intervalo: {self.collection_interval}s")
         
+        # População de histórico desabilitada para evitar duplicatas
+        # Se precisar popular histórico, execute: docker exec -it weaither-python-collector python populate_historical.py
+        logger.info("ℹ️  População de dados históricos desabilitada (evita duplicatas)")
+
+        # Executar imediatamente na primeira vez
+        try:
+            self.run_once()
+        except Exception as e:
+            logger.error(f"❌ Erro na primeira execução: {e}")
+
         while True:
             try:
+                # Calcular tempo até a próxima hora cheia
+                now = datetime.now()
+                next_run = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+                sleep_seconds = (next_run - now).total_seconds()
+                
+                logger.info(f"⏳ Aguardando {int(sleep_seconds)}s até a próxima hora cheia ({next_run.strftime('%H:%M')})...")
+                time.sleep(sleep_seconds)
+                
                 self.run_once()
-                logger.info(f"⏳ Aguardando {self.collection_interval}s para próxima coleta...")
-                time.sleep(self.collection_interval)
                 
             except KeyboardInterrupt:
                 logger.info("\n⏹️  Coletor interrompido pelo usuário")
