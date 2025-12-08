@@ -128,11 +128,7 @@ services:
   # ==========================================
   # FRONTEND - React + Vite
   # ==========================================
-  # NOTA: Frontend está desabilitado por padrão para desenvolvimento
-  # Para habilitar: docker-compose --profile with-frontend up -d
   frontend:
-    profiles:
-      - with-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile

@@ -481,4 +481,4 @@ Funcionalidades que podem ser implementadas em versões futuras:
 
 ## 📹 Vídeo Explicativo
 
-_Link será adicionado após finalização_
+https://youtu.be/H-EftKme_ag
